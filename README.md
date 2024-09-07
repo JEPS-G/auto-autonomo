@@ -10,3 +10,6 @@ Componentes utilizados:
 .4 ruedas
 .giro hecho a mano con servo motor
 .un interruptor
+.3 ultra sonicos
+.2 motores DC 130 de 12v
+
