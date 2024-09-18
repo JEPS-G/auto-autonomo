@@ -12,4 +12,6 @@ Componentes utilizados:
 .un interruptor
 .3 ultra sonicos
 .2 motores DC 130 de 12v
+.Pixy cam 1 
+.esp32 cam para una mejor iluminacion para la PixyCam
 
