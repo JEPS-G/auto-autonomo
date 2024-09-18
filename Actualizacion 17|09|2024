@@ -1,0 +1,163 @@
+#include <Servo.h>
+
+// Declaración del servo
+Servo servo; 
+
+// Pposiciones del Giro
+const int centro = 100; // Ajustado a 90 grados para el rango típico
+const int izquierda = 70; // Ajustado para girar a la izquierda
+const int derecha = 280; // Ajustado para girar a la derecha
+const int levementeIzquierda = 75 ; // Ajustado para girar ligeramente a la izquierda
+const int levementeDerecha = 180; // Ajustado para girar ligeramente a la derecha
+
+// Velocidad de los motores
+const int velocidadAdelante = 120;
+
+// Pines de los sensores ultrasónicos
+const int echoPin = 9;
+const int trigPin = 8;
+const int echoPin1 = 10;
+const int trigPin1 = 11;
+const int echoPin2 = 14;
+const int trigPin2 = 15;
+
+// Pines de la placa L298N
+const int enaPin = 7;
+const int in1Pin = 5;
+const int in2Pin = 4;
+const int in3Pin = 3;
+const int in4Pin = 2;
+const int enbPin = 6;
+
+// Variables de tiempo
+unsigned long previousMillis = 0;
+const long intervaloMedida = 120; // Intervalo para la medición del sensor
+unsigned long lastServoMove = 0;
+const long intervaloServo = 120; // Intervalo entre movimientos del servo
+
+// Variables para controlar la distancia recorrida
+float distanciaRecorrida = 0.0;  // Distancia total recorrida en metros
+unsigned long lastUpdateDistancia = 0; // Tiempo de la última actualización de distancia
+const float tiempoPorMedicion = 0.01; // 10 ms en segundos
+
+void setup() {
+  // Inicializar el monitor serial
+  Serial.begin(9600);
+
+  // Configurar el pin del servo
+  servo.attach(12);
+
+  // Configurar los pines de los sensores ultrasónicos
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(trigPin1, OUTPUT);
+  pinMode(echoPin1, INPUT);
+  pinMode(trigPin2, OUTPUT);
+  pinMode(echoPin2, INPUT);
+
+  // Configurar los pines de la placa L298N
+  pinMode(enaPin, OUTPUT);
+  pinMode(in1Pin, OUTPUT);
+  pinMode(in2Pin, OUTPUT);
+  pinMode(in3Pin, OUTPUT);
+  pinMode(in4Pin, OUTPUT);
+  pinMode(enbPin, OUTPUT);
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+
+  // Controlar la medición del sensor ultrasónico
+  if (currentMillis - previousMillis >= intervaloMedida) {
+    previousMillis = currentMillis;
+
+    int distance = medirDistancia(trigPin, echoPin);
+    int distance1 = medirDistancia(trigPin1, echoPin1);
+    int distance2 = medirDistancia(trigPin2, echoPin2);
+
+    // Mostrar las distancias en el monitor serial
+    Serial.print("Distancia Sensor 1: ");
+    Serial.print(distance);
+    Serial.print(" cm, Distancia Sensor 2: ");
+    Serial.print(distance1);
+    Serial.print(" cm, Distancia Sensor 3: ");
+    Serial.print(distance2);
+    Serial.println(" cm");
+
+    // Actualizar la distancia recorrida
+    if (currentMillis - lastUpdateDistancia >= intervaloMedida) {
+      distanciaRecorrida += velocidadAdelante * (255.0 / velocidadAdelante) * tiempoPorMedicion / 100.0;
+      lastUpdateDistancia = currentMillis;
+
+    }
+
+    // Detener el robot si ha recorrido 9 metros
+    if (distanciaRecorrida >= 11.57) {
+      moverMotores(0, false); // Detener los motores
+      servo.write(centro);    // Centrar el servo
+      Serial.println("Robot detenido. Ha recorrido 9 metros.");
+      while (true); // Detener el loop
+    }
+
+    // Controlar los motores y el servo según la distancia medida
+    if (distance < 110 & distance2 < distance1 ) {
+      moverMotores(velocidadAdelante, true);
+      if (currentMillis - lastServoMove >= intervaloServo) {
+        servo.write(derecha);
+        lastServoMove = currentMillis;
+      }
+    } else if (distance1 < 75 & distance1 < distance2) {
+      moverMotores(velocidadAdelante, true);
+      if (currentMillis - lastServoMove >= intervaloServo) {
+        servo.write(levementeDerecha);
+        lastServoMove = currentMillis;
+      }
+    } else if (distance2 < 75 & distance2 < distance1) {
+      moverMotores(velocidadAdelante, true);
+      if (currentMillis - lastServoMove >= intervaloServo) {
+        servo.write(levementeIzquierda);
+        lastServoMove = currentMillis;
+      }
+    } else {
+      moverMotores(velocidadAdelante, true);
+      if (currentMillis - lastServoMove >= intervaloServo) {
+        servo.write(centro);
+        lastServoMove = currentMillis;
+      }
+    }
+  }
+}
+
+int medirDistancia(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH);
+
+  int distance = duration * 0.034 / 2;
+
+  return distance;
+}
+
+void moverMotores(int velocidad, bool adelante) {
+  velocidad = constrain(velocidad, 0, 255);
+
+  analogWrite(enaPin, velocidad);
+  analogWrite(enbPin, velocidad);
+
+  if (adelante) {
+    digitalWrite(in1Pin, HIGH);
+    digitalWrite(in2Pin, LOW);
+    digitalWrite(in3Pin, HIGH);
+    digitalWrite(in4Pin, LOW);
+  } else {
+    digitalWrite(in1Pin, LOW);
+    digitalWrite(in2Pin, LOW);
+    digitalWrite(in3Pin, LOW);
+    digitalWrite(in4Pin, LOW);
+  }
+}
+
