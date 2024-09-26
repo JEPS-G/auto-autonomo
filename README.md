@@ -28,4 +28,3 @@ Componentes utilizados:
 |.esp32 cam para una mejor iluminacion para la PixyCam
 
 El presupuesto utilizado fue de  $604.58 dolares el cual se elava mas por otros objetos llegando a un total de $672.62 dolares
-
