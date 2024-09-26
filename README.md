@@ -7,11 +7,11 @@ Componentes utilizados:
 
 |.arduino mega
 
-|.placa sheld 2.5
+|.placa sheld 2.0 para mega
 
 |.jumpers
 
-|.4 baterias recargables 9v y 2 de 3.7v unidas
+|.6 baterias recargables 9v y 2 de 3.7v unidas
 
 |.4 ruedas
 
@@ -26,4 +26,6 @@ Componentes utilizados:
 |.Pixy cam 1 
 
 |.esp32 cam para una mejor iluminacion para la PixyCam
+
+El presupuesto utilizado fue de  $604.58 dolares el cual se elava mas por otros objetos llegando a un total de $672.62 dolares
 
